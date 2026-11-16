@@ -47,9 +47,18 @@
 
 ---
 
-## 📂 資料集與檔案結構
+## 📂 資料集、訓練程式碼與檔案結構
 
 - `index.html`：GitHub Pages 互動式學術展示網站（含圖表燈箱放大、分頁切換與資料下載）
+- `scripts/`：**完整 Python 機器學習訓練與 WebRTC 採集程式碼**
+  - [`scripts/train_enhanced_qoe_models.py`](scripts/train_enhanced_qoe_models.py)：**強化版主訓練程式**（計算 22 維因果時序特徵，以 `scikit-learn` 訓練 800 棵樹 `RF-Pro` 軟投票集成森林與 `Deep MLP-Pro (128-64-32)` 深度神經網路）
+  - [`scripts/train_and_plot_qoe_ml.py`](scripts/train_and_plot_qoe_ml.py)：基礎模型訓練與跨傳輸層（UDP / QUIC / TCP）特徵重要度位移分析程式
+  - [`scripts/compare_with_and_without_ml.py`](scripts/compare_with_and_without_ml.py)：「有預訓練模型主動防凍調控」vs.「原本沒模型」跨影片正面對決實測程式
+  - [`scripts/evaluate_cross_video_ml.py`](scripts/evaluate_cross_video_ml.py)：3 部未知新影片（Foreman / Bus / Football）跨影片泛化推論程式
+  - [`scripts/collect_transport_qoe_metrics.py`](scripts/collect_transport_qoe_metrics.py)：Selenium + Headless Chrome 自動化 `RTCPeerConnection.getStats()` 指標採集程式
+  - [`scripts/live_web_demo.py`](scripts/live_web_demo.py)：5 分鐘連續循環壓測與即時網頁儀表板演示程式
+  - [`scripts/tc_netem_ctl.sh`](scripts/tc_netem_ctl.sh)：Linux 核心 `tc qdisc netem` 真實掉包、延遲抖動與頻寬限制控制腳本
+- `models/`：訓練完成之 Scikit-Learn 模型權重檔（`rf_pro_qoe_model.joblib`, `mlp_pro_qoe_model.joblib`, `rf_qoe_model.joblib`, `mlp_qoe_model.joblib`）
 - `assets/charts/`：所有 300 DPI 高解析度實驗圖表與系統架構圖
 - `assets/data/`：
   - `transport_qoe_5min_ngrok.csv`（570 筆 5 分鐘連續 5 輪循環實測資料集）

@@ -689,11 +689,21 @@
     <h2 class="section-title">📂 開放資料集下載與一鍵重現指令</h2>
     <p class="section-desc">本專案所有實測 CSV 資料集與訓練腳本皆可直接下載或於伺服器上一鍵重現：</p>
 
-    <div class="hero-actions" style="justify-content:flex-start;margin-bottom:24px;">
+    <div class="hero-actions" style="justify-content:flex-start;margin-bottom:16px;">
       <a href="assets/data/transport_qoe_5min_ngrok.csv" download class="btn btn-secondary">📊 5 分鐘連續壓測資料集 (570 筆 CSV)</a>
       <a href="assets/data/transport_qoe_dataset.csv" download class="btn btn-secondary">🌐 跨傳輸協定 UDP/QUIC/TCP 資料集 (243 筆 CSV)</a>
       <a href="assets/data/cross_video_test_dataset.csv" download class="btn btn-secondary">🎬 跨影片 Foreman/Bus/Football 資料集 (207 筆 CSV)</a>
       <a href="assets/data/with_vs_without_ml_results.csv" download class="btn btn-secondary">⚡ 有模型 vs. 沒模型實測對比數據 (CSV)</a>
+    </div>
+
+    <h3 style="margin: 22px 0 12px; color: #93c5fd;">🐍 Python 機器學習訓練與實測程式碼 (Source Code &amp; Pre-Trained Models)</h3>
+    <div class="hero-actions" style="justify-content:flex-start;margin-bottom:20px;">
+      <a href="scripts/train_enhanced_qoe_models.py" class="btn btn-primary">🧠 train_enhanced_qoe_models.py (強化版 RF-Pro / MLP-Pro 主訓練程式)</a>
+      <a href="scripts/train_and_plot_qoe_ml.py" class="btn btn-secondary">📈 train_and_plot_qoe_ml.py (基礎模型與跨協定特徵位移分析)</a>
+      <a href="scripts/compare_with_and_without_ml.py" class="btn btn-secondary">🔥 compare_with_and_without_ml.py (有模型 vs. 沒模型主動防凍實測)</a>
+      <a href="scripts/evaluate_cross_video_ml.py" class="btn btn-secondary">🎬 evaluate_cross_video_ml.py (跨影片泛化測試)</a>
+      <a href="scripts/collect_transport_qoe_metrics.py" class="btn btn-secondary">📡 collect_transport_qoe_metrics.py (WebRTC getStats 指標採集)</a>
+      <a href="scripts/tc_netem_ctl.sh" class="btn btn-secondary">🌐 tc_netem_ctl.sh (Linux 核心網路損傷注入)</a>
     </div>
 
     <pre><code># 1. 採集跨傳輸協定 (UDP / QUIC / TCP) 真實 Linux tc-netem 損傷數據
