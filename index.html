@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transport-Aware QoE Modeling for WebRTC | GitHub Research Portal</title>
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --bg-card: #111827;
+      --bg-card-hover: #1e293b;
+      --border: #1f2937;
+      --border-accent: #3b82f6;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --primary: #3b82f6;
+      --emerald: #10b981;
+      --amber: #f59e0b;
+      --rose: #ef4444;
+      --purple: #a855f7;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", sans-serif;
+      line-height: 1.65;
+    }
+
+    /* Navbar */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 15, 25, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #60a5fa;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.92rem;
+      font-weight: 600;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: #fff;
+    }
+
+    .btn-demo {
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #fff !important;
+      padding: 7px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+    }
+
+    /* Hero */
+    .hero {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 64px 24px 42px;
+      text-align: center;
+    }
+
+    .badges {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 5px 12px;
+      border-radius: 999px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.4);
+      color: #93c5fd;
+    }
+
+    .badge.green {
+      background: rgba(16, 185, 129, 0.15);
+      border-color: rgba(16, 185, 129, 0.4);
+      color: #6ee7b7;
+    }
+
+    .badge.purple {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.4);
+      color: #d8b4fe;
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 3.6vw, 2.75rem);
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: 14px;
+      background: linear-gradient(90deg, #ffffff, #93c5fd, #6ee7b7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 880px;
+      margin: 0 auto 30px;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 48px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 22px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: pointer;
+      border: 1px solid transparent;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: #fff;
+      box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35);
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border-color: #334155;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+
+    .kpi-card.green::before { background: var(--emerald); }
+    .kpi-card.amber::before { background: var(--amber); }
+    .kpi-card.purple::before { background: var(--purple); }
+
+    .kpi-val {
+      font-size: 2rem;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .kpi-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #60a5fa;
+      margin-bottom: 6px;
+    }
+
+    .kpi-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    /* Section */
+    section {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 56px 24px;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-title {
+      font-size: 1.65rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      font-size: 0.98rem;
+    }
+
+    /* 4 Split Charts Grid */
+    .split-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(520px, 1fr));
+      gap: 24px;
+    }
+
+    @media (max-width: 640px) {
+      .split-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .chart-card:hover {
+      border-color: var(--border-accent);
+      transform: translateY(-2px);
+    }
+
+    .chart-card h3 {
+      font-size: 1.08rem;
+      margin-bottom: 6px;
+      color: #e2e8f0;
+    }
+
+    .chart-card p {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .chart-img-wrap {
+      background: #fff;
+      border-radius: 10px;
+      padding: 6px;
+      overflow: hidden;
+      cursor: zoom-in;
+    }
+
+    .chart-img-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 6px;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active, .tab-btn:hover {
+      background: #1e3a8a;
+      color: #fff;
+      border-color: #3b82f6;
+    }
+
+    .tab-pane {
+      display: none;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      background: var(--bg-card);
+    }
+
+    th, td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #1e293b;
+      color: #93c5fd;
+      font-weight: 700;
+    }
+
+    tr:hover td {
+      background: rgba(59, 130, 246, 0.06);
+    }
+
+    .hl-green { color: #34d399; font-weight: 800; }
+    .hl-red { color: #f87171; font-weight: 700; }
+    .hl-blue { color: #60a5fa; font-weight: 800; }
+
+    /* Code block */
+    pre {
+      background: #090d16;
+      border: 1px solid #1e293b;
+      padding: 16px;
+      border-radius: 10px;
+      overflow-x: auto;
+      color: #e2e8f0;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem;
+      margin-top: 10px;
+    }
+
+    /* Lightbox Modal */
+    #lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.88);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      cursor: zoom-out;
+    }
+
+    #lightbox img {
+      max-width: 96vw;
+      max-height: 92vh;
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.8);
+    }
+
+    footer {
+      text-align: center;
+      padding: 36px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.88rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#" class="brand">
+      <span>📡 WebRTC-QoE-ML</span>
+    </a>
+    <div class="nav-links">
+      <a href="#comparison-4charts">有模型 vs. 沒模型 (4張圖)</a>
+      <a href="#deep-analysis">完整論文實驗圖庫</a>
+      <a href="#methodology">訓練方法與特徵工程</a>
+      <a href="#datasets">資料集與程式碼下載</a>
+      <a href="/" class="btn-demo">🎥 進入即時 WebRTC 會議室</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="badges">
+      <span class="badge">WebRTC SFU (mediasoup)</span>
+      <span class="badge green">Linux Kernel tc-netem 真實損傷實測</span>
+      <span class="badge purple">RF-Pro &amp; Deep MLP-Pro (22 維時序特徵)</span>
+    </div>
+    <h1>Transport-Aware QoE Modeling for WebRTC:<br/>Predicting Playback Freezes with Machine Learning</h1>
+    <p class="subtitle">
+      結合瀏覽器端 W3C <code>RTCPeerConnection.getStats()</code> 即時遙測、跨傳輸協定感知（UDP / QUIC / TCP）與 22 維因果時序機器學習模型，實現高精準度畫面凍結預警與主動式防凍調控。
+    </p>
+
+    <div class="hero-actions">
+      <a href="#comparison-4charts" class="btn btn-primary">📊 查看「有模型 vs. 原本沒模型」4 張對比圖</a>
+      <a href="/" class="btn btn-secondary">🚀 開啟 Live WebRTC 互動監測平台</a>
+      <a href="assets/data/transport_qoe_5min_ngrok.csv" download class="btn btn-secondary">📥 下載 5 分鐘實測 CSV 資料集</a>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card green">
+        <div class="kpi-val">71.9% → 15.8%</div>
+        <div class="kpi-label">畫面凍結率大幅下降 (-56.1%)</div>
+        <div class="kpi-desc">接上預訓練 RF 模型主動壓制佇列溢位，在 Foreman 實測減少近 4/5 畫面卡頓，平均凍結時長縮短 88%。</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-val">93.04% F1</div>
+        <div class="kpi-label">RF-Pro 強化版凍結預測準確度</div>
+        <div class="kpi-desc">於 1,020 筆跨協定與跨影片真實樣本上達 95.70% ROC-AUC、94.92% Precision（遠勝傳統掉包規則之 63.63%）。</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-val">89.24% F1</div>
+        <div class="kpi-label">提前 1.5 秒預警下一窗凍結 (t → t+1)</div>
+        <div class="kpi-desc">透過 EMA-3 滑動趨勢、ΔJB Delay 斜率與相對碼率驟降比，在卡頓發生前 1.5 秒精準預警。</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-val">7.1% → 92.9%</div>
+        <div class="kpi-label">跨傳輸層 (TCP) 預測 F1 躍升</div>
+        <div class="kpi-desc">證明傳統僅看掉包/NACK 的模型在可靠傳輸下完全失效，而論文 Transport-Aware 模型維持 92.86% 高準確率。</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Section 1: 4 Split Charts -->
+  <section id="comparison-4charts">
+    <h2 class="section-title">🔥 「有預訓練模型」vs.「原本沒模型」正面對決（4 張獨立高解析度圖表）</h2>
+    <p class="section-desc">
+      在相同 Linux 核心 <code>tc netem</code> 頻寬受限瓶頸（<code>12 Mbps → 2.2 Mbps → 1.2 Mbps → 750 Kbps</code>）與 3 部不同動態複雜度標準測試影片（<code>Foreman</code>、<code>Bus</code>、<code>Football</code>）下，對比「原本沒模型」與「接上預訓練 RF 模型主動防凍調控」之實測結果（點擊任一圖表可放大檢視 300 DPI 原圖）：
+    </p>
+
+    <div class="split-grid">
+      <div class="chart-card">
+        <h3>圖 1：畫面凍結發生率對比 (Freeze Rate %)</h3>
+        <p>有 RF 模型主動預警調控後，Foreman 凍結率由 <b>71.9% 暴降至 15.8%</b>，Bus 由 77.2% 降至 52.6%，Football 由 73.7% 降至 56.1%。</p>
+        <div class="chart-img-wrap" onclick="openLightbox('assets/charts/split_1_freeze_rate.png')">
+          <img src="assets/charts/split_1_freeze_rate.png" alt="圖 1 畫面凍結率對比" />
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>圖 2：媒體緩衝區延遲對比 (JitterBufferDelay ms)</h3>
+        <p>主動抑制發送端碼率避免緩衝區積壓，使 Football 的 JitterBufferDelay 由 <b>885.1 ms 大降 63% 至 326.1 ms</b>。</p>
+        <div class="chart-img-wrap" onclick="openLightbox('assets/charts/split_2_jitter_buffer_delay.png')">
+          <img src="assets/charts/split_2_jitter_buffer_delay.png" alt="圖 2 媒體緩衝區延遲對比" />
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>圖 3：網路排隊延遲 (RTT ms) 對比</h3>
+        <p>消除佇列塞爆（Bufferbloat），使 Foreman 與 Bus 的往返排隊延遲分別由 <b>934 ms → 372 ms (-60%)</b> 與 <b>990 ms → 348 ms (-65%)</b>。</p>
+        <div class="chart-img-wrap" onclick="openLightbox('assets/charts/split_3_queueing_rtt.png')">
+          <img src="assets/charts/split_3_queueing_rtt.png" alt="圖 3 網路排隊延遲對比" />
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <h3>圖 4：凍結預警準確度對比 (F1-Score &amp; ROC-AUC)</h3>
+        <p>在全部 1,020 筆樣本上，強化版 <b>RF-Pro (93.0% F1 / 95.7% AUC)</b> 與 <b>MLP-Pro (92.2% F1)</b> 全面勝出傳統無模型單一門檻規則。</p>
+        <div class="chart-img-wrap" onclick="openLightbox('assets/charts/split_4_prediction_accuracy.png')">
+          <img src="assets/charts/split_4_prediction_accuracy.png" alt="圖 4 凍結預警準確度對比" />
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>測試影片 (Xiph/ITU 標準序列)</th>
+            <th>控制模式</th>
+            <th>畫面凍結率 (Freeze Rate)</th>
+            <th>單窗平均凍結時長</th>
+            <th>緩衝區延遲 (JitterBuffer)</th>
+            <th>網路排隊延遲 (RTT)</th>
+            <th>平均幀率 (FPS)</th>
+            <th>累計溢位掉包數</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td rowspan="2"><b>Foreman</b><br/><span style="color:#94a3b8;font-size:0.8rem;">中動態人物與工地轉場</span></td>
+            <td class="hl-red">🔴 原本沒模型 (Baseline)</td>
+            <td class="hl-red">71.93%</td>
+            <td>1588.9 ms</td>
+            <td>349.5 ms</td>
+            <td>933.5 ms</td>
+            <td>5.58 FPS</td>
+            <td>987 封包</td>
+          </tr>
+          <tr>
+            <td class="hl-green">🟢 有 RF 模型主動防凍</td>
+            <td class="hl-green">15.79% (-56.1%)</td>
+            <td class="hl-green">185.3 ms (-88%)</td>
+            <td class="hl-green">235.5 ms (-33%)</td>
+            <td class="hl-green">372.1 ms (-60%)</td>
+            <td class="hl-blue">13.56 FPS (2.4x)</td>
+            <td class="hl-green">33 封包 (-96.7%)</td>
+          </tr>
+          <tr>
+            <td rowspan="2"><b>Bus</b><br/><span style="color:#94a3b8;font-size:0.8rem;">高細節街景公車橫移</span></td>
+            <td class="hl-red">🔴 原本沒模型 (Baseline)</td>
+            <td class="hl-red">77.19%</td>
+            <td>1034.4 ms</td>
+            <td>545.1 ms</td>
+            <td>990.2 ms</td>
+            <td>5.21 FPS</td>
+            <td>688 封包</td>
+          </tr>
+          <tr>
+            <td class="hl-green">🟢 有 RF 模型主動防凍</td>
+            <td class="hl-green">52.63% (-24.6%)</td>
+            <td class="hl-green">452.2 ms (-56%)</td>
+            <td class="hl-green">318.6 ms (-42%)</td>
+            <td class="hl-green">347.7 ms (-65%)</td>
+            <td class="hl-blue">10.24 FPS (2.0x)</td>
+            <td class="hl-green">21 封包 (-96.9%)</td>
+          </tr>
+          <tr>
+            <td rowspan="2"><b>Football</b><br/><span style="color:#94a3b8;font-size:0.8rem;">極高動態美式足球賽事</span></td>
+            <td class="hl-red">🔴 原本沒模型 (Baseline)</td>
+            <td class="hl-red">73.68%</td>
+            <td>1054.0 ms</td>
+            <td>885.1 ms</td>
+            <td>600.6 ms</td>
+            <td>6.27 FPS</td>
+            <td>1,356 封包</td>
+          </tr>
+          <tr>
+            <td class="hl-green">🟢 有 RF 模型主動防凍</td>
+            <td class="hl-green">56.14% (-17.5%)</td>
+            <td class="hl-green">546.7 ms (-48%)</td>
+            <td class="hl-green">326.1 ms (-63%)</td>
+            <td class="hl-green">402.3 ms (-33%)</td>
+            <td class="hl-blue">9.36 FPS (+49%)</td>
+            <td class="hl-green">31 封包 (-97.7%)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Section 2: Tabbed Deep-Dive Gallery -->
+  <section id="deep-analysis">
+    <h2 class="section-title">📈 論文核心實驗與深度視覺化圖庫</h2>
+    <p class="section-desc">切換下方分頁可檢視 5 分鐘連續循環時序分析、RF-Pro vs. MLP-Pro 訓練評估、跨傳輸層特徵位移以及跨影片泛化測試：</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab(event, 'tab-ml')">1. 強化版 RF-Pro vs. MLP-Pro 評估與 Top-12 特徵</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-transport')">2. 跨傳輸層 (UDP / QUIC / TCP) 特徵重要度位移</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-5min')">3. 5 分鐘 (300 秒 / 5 輪循環) 時序動態曲線</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-crossvideo')">4. 3 部未知新影片跨影片泛化測試</button>
+      <button class="tab-btn" onclick="switchTab(event, 'tab-arch')">5. 系統架構與運作流程圖</button>
+    </div>
+
+    <div id="tab-ml" class="tab-pane active">
+      <h3 style="margin-bottom:8px;">強化版 RF-Pro (800 棵集成決策樹) vs. Deep MLP-Pro (128-64-32) 評估結果</h3>
+      <p style="color:var(--text-muted);margin-bottom:14px;">結合 22 個純傳輸與緩衝時序特徵，於 1,020 筆樣本執行 5-Fold 分層交叉驗證，並展示 Top-12 關鍵預測特徵排序：</p>
+      <div class="chart-img-wrap" onclick="openLightbox('assets/charts/qoe_ml_model_comparison_roc_cm.png')">
+        <img src="assets/charts/qoe_ml_model_comparison_roc_cm.png" alt="RF-Pro vs MLP-Pro 模型評估" />
+      </div>
+    </div>
+
+    <div id="tab-transport" class="tab-pane">
+      <h3 style="margin-bottom:8px;">跨傳輸層協定 (UDP vs. QUIC vs. TCP) 凍結預測特徵重要度位移</h3>
+      <p style="color:var(--text-muted);margin-bottom:14px;">驗證論文核心發現：在可靠傳輸 (TCP) 下，OS 底層重傳掩蓋了 RTP 掉包與 NACK，使關鍵預測指標轉移至 <code>JitterBufferDelay (32.93%)</code> 與 <code>Jitter (22.56%)</code>：</p>
+      <div class="chart-img-wrap" onclick="openLightbox('assets/charts/qoe_transport_feature_importance.png')">
+        <img src="assets/charts/qoe_transport_feature_importance.png" alt="跨傳輸層特徵重要度位移" />
+      </div>
+    </div>
+
+    <div id="tab-5min" class="tab-pane">
+      <h3 style="margin-bottom:8px;">WebRTC 5 分鐘 (300 秒 / 5 輪循環) 真實 Linux tc-netem 網路損傷時序圖</h3>
+      <p style="color:var(--text-muted);margin-bottom:14px;">每 60 秒完成一輪四階段網路損傷循環（0% → 3.5% → 7.5% → 14% 掉包），完整記錄 570 筆時間視窗之碼率、FPS、掉包、NACK、緩衝延遲與凍結時長：</p>
+      <div class="chart-img-wrap" onclick="openLightbox('assets/charts/qoe_5min_timeseries_curves.png')">
+        <img src="assets/charts/qoe_5min_timeseries_curves.png" alt="5 分鐘時序分析圖" />
+      </div>
+    </div>
+
+    <div id="tab-crossvideo" class="tab-pane">
+      <h3 style="margin-bottom:8px;">跨影片泛化測試 (Zero-Retraining Cross-Video Generalization)</h3>
+      <p style="color:var(--text-muted);margin-bottom:14px;">將僅在靜態主播影片 (Akiyo) 上訓練的模型，直接用於預測 Foreman、Bus、Football 三部未知新影片，整體 ROC-AUC 達 95.64%：</p>
+      <div class="chart-img-wrap" onclick="openLightbox('assets/charts/qoe_cross_video_generalization.png')">
+        <img src="assets/charts/qoe_cross_video_generalization.png" alt="跨影片泛化測試圖" />
+      </div>
+    </div>
+
+    <div id="tab-arch" class="tab-pane">
+      <h3 style="margin-bottom:8px;">mediasoup WebRTC SFU 系統架構與自適應控制流程圖</h3>
+      <div class="split-grid" style="margin-top:14px;">
+        <div class="chart-img-wrap" onclick="openLightbox('assets/charts/sfu_architecture_diagram.png')">
+          <img src="assets/charts/sfu_architecture_diagram.png" alt="SFU 架構圖" />
+        </div>
+        <div class="chart-img-wrap" onclick="openLightbox('assets/charts/sfu_simple_flowchart.png')">
+          <img src="assets/charts/sfu_simple_flowchart.png" alt="SFU 控制流程圖" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 3: Methodology -->
+  <section id="methodology">
+    <h2 class="section-title">🧠 強化版模型訓練方法與 22 維因果時序特徵工程</h2>
+    <p class="section-desc">
+      為徹底杜絕目標洩漏（Target Leakage），模型訓練嚴格排除 <code>fps</code> 與 <code>inter_frame_delay</code>，僅使用純傳輸層、緩衝區與重傳指標及其過去視窗 ($t-2, t-1, t$) 之因果趨勢特徵：
+    </p>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">1. 相對碼率驟降比 (Bitrate Drop Ratio)</div>
+        <div class="kpi-desc">計算當下碼率與該串流歷史健康峰值之比值 $\text{Bitrate}_t / \text{PeakBitrate}$，消除不同影片（如靜態主播 vs. 美式足球）天生基礎碼率差異。</div>
+      </div>
+      <div class="kpi-card green">
+        <div class="kpi-label">2. 指數移動平均與斜率 (EMA-3 &amp; Δ)</div>
+        <div class="kpi-desc">提取 <code>rtt_ema3</code>、<code>jb_delay_ema3</code>、<code>nack_ema3</code> 與瞬時斜率 <code>ΔRTT</code>、<code>ΔJB Delay</code>，分辨佇列正在惡化膨脹或排空恢復。</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-label">3. 未救回淨掉包數 (Lost − RTX)</div>
+        <div class="kpi-desc">計算 $\max(0, \text{packetsLost} - \text{retransmittedPackets})$，精準區分「已被 RTX 重傳救回之掉包」與「真正導致解碼破圖之缺口」。</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-label">4. RF-Pro 軟投票集成 + Deep MLP-Pro</div>
+        <div class="kpi-desc">結合 400 棵 RandomForest + 400 棵 ExtraTrees 進行機率軟投票，並搭配 <code>RobustScaler + MLP(128-64-32)</code> 與最佳 F1 門檻校準。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section 4: Datasets & Reproducibility -->
+  <section id="datasets">
+    <h2 class="section-title">📂 開放資料集下載與一鍵重現指令</h2>
+    <p class="section-desc">本專案所有實測 CSV 資料集與訓練腳本皆可直接下載或於伺服器上一鍵重現：</p>
+
+    <div class="hero-actions" style="justify-content:flex-start;margin-bottom:24px;">
+      <a href="assets/data/transport_qoe_5min_ngrok.csv" download class="btn btn-secondary">📊 5 分鐘連續壓測資料集 (570 筆 CSV)</a>
+      <a href="assets/data/transport_qoe_dataset.csv" download class="btn btn-secondary">🌐 跨傳輸協定 UDP/QUIC/TCP 資料集 (243 筆 CSV)</a>
+      <a href="assets/data/cross_video_test_dataset.csv" download class="btn btn-secondary">🎬 跨影片 Foreman/Bus/Football 資料集 (207 筆 CSV)</a>
+      <a href="assets/data/with_vs_without_ml_results.csv" download class="btn btn-secondary">⚡ 有模型 vs. 沒模型實測對比數據 (CSV)</a>
+    </div>
+
+    <pre><code># 1. 採集跨傳輸協定 (UDP / QUIC / TCP) 真實 Linux tc-netem 損傷數據
+python3 tests/collect_transport_qoe_metrics.py
+
+# 2. 執行 5 分鐘 (300 秒 / 5 輪循環) ngrok 即時網頁演示與數據採集
+python3 tests/live_web_demo.py
+
+# 3. 訓練強化版 RF-Pro 與 Deep MLP-Pro 模型並產出所有 300 DPI 論文圖表
+python3 tests/train_enhanced_qoe_models.py
+
+# 4. 執行「有預訓練模型主動防凍」vs.「原本沒模型」跨影片正面對決實測
+python3 tests/compare_with_and_without_ml.py</code></pre>
+  </section>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" onclick="closeLightbox()">
+    <img id="lightbox-img" src="" alt="Full Resolution Chart" />
+  </div>
+
+  <footer>
+    Transport-Aware QoE Modeling for WebRTC — Built with mediasoup SFU, W3C WebRTC Stats API, Linux Kernel tc-netem &amp; Scikit-Learn.
+  </footer>
+
+  <script>
+    function switchTab(ev, tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+      ev.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+    }
+
+    function openLightbox(src) {
+      const lb = document.getElementById('lightbox');
+      const img = document.getElementById('lightbox-img');
+      img.src = src;
+      lb.style.display = 'flex';
+    }
+
+    function closeLightbox() {
+      document.getElementById('lightbox').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
